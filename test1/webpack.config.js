@@ -15,8 +15,8 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 process.env.NODE_ENV = 'production'
 
 module.exports = {
-  mode: 'development',
-  // mode:'production',
+  // mode: 'development',
+  mode:'production',
   entry: './src/index.js',
   output: {
     filename: '[name].bundle.js',
@@ -130,7 +130,37 @@ module.exports = {
         generator: {
           filename: 'static/[hash:10][ext][query]'//所有 html 文件都将被发送到输出目录中的 static 目录中
         }
-      }*/
+      },*/
+      {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            // 使用配置文件babel.config.json
+            rootMode: "upward",
+            // 使用此处配置
+            /*presets: [
+              [
+                '@babel/preset-env',
+                {
+                  useBuiltIns: 'usage',//按需加载
+                  corejs:{
+                    version: 3
+                  },
+                  targets: {
+                    chrome: '60',
+                    firefox:'60',
+                    ie: '9',
+                    safari: '11',
+                    edge:'17'
+                  }
+                }
+              ]
+            ],*/
+          }
+        }
+      },
     ],
   },
   //插件
@@ -142,9 +172,15 @@ module.exports = {
       filename:'css/[name].css'
     }),
     new HtmlWebpackPlugin({
-      template: './src/index.html' //模板
+      template: './src/index.html', //模板
+      minify:{
+        collapseWhitespace:true,//移除空格,默认true
+        removeComments:true,//移除注释,默认true
+      }
     }),
-    new ESLintPlugin(options),
+    new ESLintPlugin({
+      fix:true
+    }),
   ],
 
   devServer: {

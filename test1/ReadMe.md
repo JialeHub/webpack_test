@@ -121,9 +121,58 @@
 
 **代码检查EsLint**
 
+    loader(废弃)：npm install eslint-loader eslint --D
     插件(推荐)：EslintWebpackPlugin
+        npm install eslint --global
         npm install eslint-webpack-plugin eslint --D
         https://webpack.docschina.org/plugins/eslint-webpack-plugin/
-    loader(废弃)：npm install eslint-loader eslint --D
     
     使用airbnb风格
+        https://www.npmjs.com/package/eslint-config-airbnb-base
+        5.x：npx install-peerdeps --dev eslint-config-airbnb-base
+
+    配置文件：
+        .eslintrc.js(运行eslint --init可生成)
+        .eslintignore
+
+    忽略下一行
+        eslint-disable-next-line
+
+**JS兼容性处理**
+
+    babel
+        https://www.babeljs.cn/setup#installation
+        https://webpack.docschina.org/loaders/babel-loader/
+        npm install --save-dev babel-loader @babel/core @babel/preset-env
+    
+    基本JS兼容处理：@babel/preset-env(Promise不兼容)
+
+    全部js兼容性处理：
+        旧版且庞大不推荐 npm i @babel/polyfill -D
+
+    按需js兼容性处理
+        新版推荐(Babel 7.4+)  
+            npm i core-js regenerator-runtime -S
+            import "core-js/stable";
+            import "regenerator-runtime/runtime";
+        
+    使用配置文件：babel.config.json
+        https://babeljs.io/docs/en/config-files#root-babelconfigjson-file
+
+
+**JS压缩处理**
+
+    * 生产模式自动压缩
+    * 更多选择：
+        * UglifyjsWebpackPlugin (4.x)
+            https://webpack.docschina.org/plugins/uglifyjs-webpack-plugin/
+            npm install uglifyjs-webpack-plugin --save-dev
+
+        * BabelMinifyWebpackPlugin(Beta 不推荐)
+
+**html压缩处理**
+    
+    *配置HtmlWebpackPlugin
+
+
+    
