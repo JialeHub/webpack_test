@@ -1,0 +1,1 @@
+(()=>{"use strict";console.log({name:"test"}),console.log(3)})();
