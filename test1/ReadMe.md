@@ -14,13 +14,11 @@
     * 生产环境： webpack ./src/index.js -o ./build --mode=production
         webpack会以 ./src/index.js为入口文件开始打包，打包后输出到./build/built.js整体打包环境，是生产环境
 
-
 ### 结论 
     
     1.webpack能处理js/json资源，不能处理css/img等其他资源
     2.生产环境和开发环境将ES6模块化编译成浏览器能识别的模块化~
     3.生产模式比开发环境多了压缩
-
 
 ### 引入资源 
 
@@ -83,7 +81,6 @@
 
         排除：如需从 asset loader 中排除来自新 URL 处理的 asset，请添加 dependency: { not: ['url'] } 到 loader 配置中。
 
-
 ### devServer 
 
     * 作用：开发服务器 devServer ：自动编译，打开浏览器，刷新浏览器...
@@ -94,7 +91,6 @@
         webpack //将打包结果输出
         npx webpack-dev-server //只会在内存中编译打包，没有输出
         webpack serve  (5.x)
-
 
 ### 清理dist文件夹 
 
@@ -172,7 +168,6 @@
     使用配置文件：babel.config.json
         https://babeljs.io/docs/en/config-files#root-babelconfigjson-file
 
-
 ### JS压缩处理 
 
     * 生产模式自动压缩
@@ -189,7 +184,6 @@
 ### html压缩处理 
     
     *配置HtmlWebpackPlugin
-
 
 ### 性能优化 
 
@@ -213,7 +207,6 @@
                 * 懒加载 预加载
                 * PWA 离线访问
 
-
 ### HMR 
 
     HMR：hot module replacement 热模块替换
@@ -229,7 +222,6 @@
         HMR功能对js处理，只能处理非入口js文件的其他文件
     html文件：默认不能用HMR，不会重新加载，同时导致html文件不能热更新，不用做HMR
         解决：修改entry入口，将html文件引入(未解决：需要html-loader，但html-loader与HtmlWebpackPlugin的冲突)
-
 
 ### Source Map 
 
@@ -277,7 +269,7 @@
         调试更友好：
             source-map
             cheap-module-source-map
-    
+
 ### oneOf 
 
     oneOf下的loader只会匹配一个，提高性能
@@ -298,7 +290,6 @@
         文件名上加contenthash：
             根据文件的内容生成hash值。不同文件hash值一定不一样
 
-
 ### tree shaking 
 
     https://webpack.docschina.org/guides/tree-shaking/
@@ -309,11 +300,9 @@
         "sideEffects": true 或
         "sideEffects": ["./src/some-side-effectful-file.js"]
 
-
 ### 代码分割 | splitChunks 
 
     * 可以将node_modules中代码单独打包一个chunk最终输出,自动分析多入口Chunk中有无公共文件，如果有将单独打包成一个Chunk
-
 
 ### 懒加载 
     
@@ -322,7 +311,6 @@
         https://webpack.docschina.org/guides/lazy-loading/
     * 预加载webpackPrefetch:会在使用之前，提前加载js文件，预加载prefetch:等其他资源加载完毕，浏览器空闲了，再偷偷加载资源，兼容性较差
         https://webpack.docschina.org/guides/code-splitting/#prefetchingpreloading-modules
-
 
 ### PWA 
 
@@ -336,20 +324,17 @@
         快速服务器：npm i serve -g
             serve -s dist
 
-
 ### 多进程打包 
 
     * npm i -D thread-loader
     * 给babel使用thread-loader
     * 进程启动大概为60oms，进程通信也有开销，只有工作消耗时间比较长，才需要。
 
-
 ### CDN加速 | externals 
 
     * 拒绝|忽略包
         https://webpack.docschina.org/configuration/externals/#root
     * html标签插入CDN
-
 
 ### dll 
 
@@ -367,7 +352,6 @@
     * 5.x: copy-webpack-plugin复制 + html-webpack-deploy-plugin引入
         npm install copy-webpack-plugin html-webpack-tags-plugin --D
         https://webpack.docschina.org/plugins/copy-webpack-plugin/
-
 
 ### 未解决的问题 
     
