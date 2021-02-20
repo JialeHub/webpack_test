@@ -73,26 +73,54 @@ module.exports = {
     test: './src/test.js',
   },
   output: {
-    publicPath: isProd ? './' : '/',
-    filename: 'static/js/[name]_[contenthash:10].bundle.js',
-    path: resolve(__dirname, 'dist'),
+    publicPath: isProd ? './' : '/',//所有资源引入公共路径前缀
+    filename: 'static/js/[name]_[contenthash:10].bundle.js',//文件名称（指定名称+目录)
+    chunkFilename: 'static/js/[name]_chunk_[contenthash:10].bundle.js',//非入口chunk的文件名称
+    path: resolve(__dirname, 'dist'),//输出文件目录（将来所有资源输出的公共目录)
     assetModuleFilename: 'assets/[name]_[contenthash:10][ext][query]',//非编译文件自定义输出文件名
   },
   //优化
   optimization: {
     //可以将node_modules中代码单独打包一个chunk最终输出,自动分析多入口Chunk中有无公共文件，如果有将单独打包成一个Chunk
     splitChunks: {
-      chunks: 'all'
+      chunks: 'all',
+      /*minSize: 30*1024,//分割的chunk最小为30kb
+      maxSize: 0,//最大没有限制
+      minChunks: 1,//要提耿的chunk最少被引用1次
+      maxAsyncRequests: 5,//按需加载时并行加载的文件的最大数量
+      maxInitialRequests: 3,//入口js文件最大并行请求数量
+      automaticNameDelimiter: '~',//名称连接符
+      // name: true,//可以使用命名规则
+      cacheGroups: { //分割chunk的组
+        //node_modules文件会被打包到 vendors 组的chunk中。--> vendors~xxx.js
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10 //优先级
+        },
+        default: {
+          //要提取的chunk最少被引用2次
+          minChunks: 2,
+          priority: -20, //优先级
+          reuseExistingChunk:true,//如果当前要打包的模块，和之前已经被提取的模块是同一个，就会复用，而不是重新打包模块
+        }
+      }*/
+    },
+    //将当前模块的记录其他模块的hash单独打包为一个文件runtime，解决了：修改a文件导致引用它的b文件的contenthash变化（缓存持久化）
+    runtimeChunk: {
+      name: entrypoint => `runtime-${entrypoint.name}`
     },
     minimize: true,
-    minimizer: [new TerserPlugin({
-      parallel: true,//多线程
-      terserOptions: {
-        compress: {
-          drop_console: false//去除console
+    minimizer: [
+      //生产环境的压缩方案：js和css
+      new TerserPlugin({
+        parallel: true,//多线程
+        terserOptions: {
+          compress: {
+            drop_console: false//去除console
+          }
         }
-      }
-    })],
+      })
+    ],
   },
   //外部扩展，从CDN获取，拒绝|忽略包
   /*externals: {
@@ -226,14 +254,14 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        {from:"dll/jquery.js",to:'assets/jquery'}
+        {from: "dll/jquery.js", to: 'assets/jquery'}
       ]
     }),
     new HtmlWebpackTagsPlugin({
       scripts: [
         {
           path: 'assets/jquery/jquery.js',
-          append:false //head前面插入
+          append: false //head前面插入
         },
       ]
     }),
@@ -241,12 +269,43 @@ module.exports = {
       fix: true
     }),
   ],
+  //解析模块规则
+  resolve: {
+    //解析模块路径别名
+    alias: {
+      $css: resolve(__dirname, 'src/style'),
+      '@': resolve(__dirname, 'src')
+    },
+    // 省略文件路径的后缀名,越前越优先
+    extensions: ['.js', '.json', '.jsx', '.css'],
+    // 告诉 webpack 解析模块是去找哪个目录,越前越优先
+    modules: [resolve(__dirname, '../node_modules'), 'node_modules']
+  },
   //解决热更新问题
   target: isProd ? "browserslist" : "web",
   devServer: {
-    contentBase: resolve(__dirname, 'dist'),
+    contentBase: resolve(__dirname, 'dist'),//运行代码的目录
     compress: true,//启用gzip压缩
     port: 3000, //端口
+    host: 'localhost',//域名
+    disableHostCheck: true,//禁用域名检查
     hot: true,//开启HMR
+    hotOnly: true,// hot 和 hotOnly 的区别是在某些模块不支持热更新的情况下，前者会自动刷新页面，后者不会刷新页面，而是在控制台输出热更新失败
+    watchContentBase: true,//监视contentBase目录下的所有文件，一旦文件变化就会reload
+    watchOptions: {
+      ignore: /node_modules/,//忽略监视文件
+    },
+    clientLogLevel: 'info',//日志输出等级 none | error | warning | info(默认)
+    quiet: false,//除了一些基本启动信息以外，其他内容都不要显示
+    overlay: false, //出错了不要全屏提示
+    proxy: {//代理服务器
+      '/api': {  //反向代理
+        target: 'http://localhost:3000', //目标服务器
+        changeOrigin: true,//允许不同源跨域
+        pathRewrite: {
+          '^/api': ''//发送请求时，请求路径重写:将/api/xxx -->/xxx(去掉/api)
+        }
+      }
+    },
   }
 }

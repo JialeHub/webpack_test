@@ -3,7 +3,7 @@ console.warn('Print Module is Loading');
 
 export function print() {
   // eslint-disable-next-line
-  console.log('OK1');
+  console.log('OK11');
 }
 
 export function noUsed() {

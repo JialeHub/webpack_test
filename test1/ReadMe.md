@@ -353,6 +353,134 @@
         npm install copy-webpack-plugin html-webpack-tags-plugin --D
         https://webpack.docschina.org/plugins/copy-webpack-plugin/
 
+### webpack配置详解介绍
+
+    entry: 入口起点
+        1.string '...' 
+            单入口，打包形成一个chunk,输出一个bundle文件,默认名称为main
+        2.Array [...] 
+            多入口，所有入口文件最终只会形成一个chunk，输出出去只有一个bundle文件。
+            一般用于HMR功能让html热更新生效
+        3.Object {...} 
+            多入口，有几个入口文件就形成几个chunk，输出几个bundle文件
+            此时chunk的名称是key
+
+    //输出
+    output:  
+        {
+            filename:文件名称（指定名称+目录)
+            path:输出文件目录（将来所有资源输出的公共目录)
+            publicPath:所有资源引入公共路径前缀  '' | '/' | './' ==> 'imgs/a.jpg' | '/imgs/a.jpg' | './imgs/a.jpg'
+            chunkFilename:非入口chunk的名称
+            library:整个库向外暴露的变量名
+            libraryTarget:变量名添加到哪里  'window' | 'global' | commonjs | ... ==> browser | node | ...
+            assetModuleFilename:非编译文件自定义输出文件名
+        }
+
+    module:{
+        rules:[
+            //loader配置
+            {
+                test: /\.css$/i  正则匹配
+                exclude: /node_modules/  //正则排除
+                include: resolve(__dirname, 'src ' ) //只检查某个路径
+                enforce: 'pre',//执行优先级 pre优先 post延后
+                loader: '单个loader'
+                options: {...配置}
+            },
+            {
+                test: 正则匹配
+                //多个loader用use
+                use:[]
+            },
+            {
+                //以下配置只用一个
+                oneOf:[]
+            }
+        ]
+    }
+
+    //配置解析模块规则
+    resolve:{
+        
+        alias:{}//配置解析模块路径别名
+        extensions:[]//配置省略文件路径的后缀名
+        modules:[]//告诉 webpack 解析模块是去找哪个目录
+    }
+
+    开发服务器
+    devServer: {
+        contentBase: resolve(__dirname, 'dist'),//运行代码的目录
+        compress: true,//启用gzip压缩
+        port: 3000, //端口
+        host: 'localhost',//域名
+        disableHostCheck: true,//禁用域名检查
+        hot: true,//开启HMR
+        hotOnly: true,// hot 和 hotOnly 的区别是在某些模块不支持热更新的情况下，前者会自动刷新页面，后者不会刷新页面，而是在控制台输出热更新失败
+        watchContentBase: true,//监视contentBase目录下的所有文件，一旦文件变化就会reload
+        watchOptions:{
+          ignore:/node_modules/,//忽略监视文件
+        },
+        clientLogLevel: 'none',//不要显示启动服务器日志信息
+        quiet:true,//除了一些基本启动信息以外，其他内容都不要显示
+        overlay:false, //出错了不要全屏提示
+        proxy:{//代理服务器
+          '/api':{  //反向代理
+            target:'http://localhost:3000', //目标服务器
+            changeOrigin: true,//允许不同源跨域
+            pathRewrite:{
+              '^/api':''//发送请求时，请求路径重写:将/api/xxx -->/xxx(去掉/api)
+            }
+          }
+        },
+    }
+
+    //优化
+    optimization: {
+        //可以将node_modules中代码单独打包一个chunk最终输出,自动分析多入口Chunk中有无公共文件，如果有将单独打包成一个Chunk
+        splitChunks: {
+            chunks: 'all',
+            /* 以下配置为默认，可忽略 */
+            minSize: 30*1024,//分割的chunk最小为30kb
+            maxSize: 0,//最大没有限制
+            minChunks: 1,//要提耿的chunk最少被引用1次
+            maxAsyncRequests: 5,//按需加载时并行加载的文件的最大数量
+            maxInitialRequests: 3,//入口js文件最大并行请求数量
+            automaticNameDelimiter: '~',//名称连接符
+            // name: true,//可以使用命名规则
+            cacheGroups: { //分割chunk的组
+                //node_modules文件会被打包到 vendors 组的chunk中。--> vendors~xxx.js
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    priority: -10 //优先级
+                },
+                default: {
+                    //要提取的chunk最少被引用2次
+                    minChunks: 2,
+                    priority: -20, //优先级
+                    reuseExistingChunk:true,//如果当前要打包的模块，和之前已经被提取的模块是同一个，就会复用，而不是重新打包模块
+                }
+            }
+        },
+        //将当前模块的记录其他模块的hash单独打包为一个文件runtime，解决了：修改a文件导致引用它的b文件的contenthash变化（缓存持久化）
+        runtimeChunk: {
+          name: entrypoint => `runtime-${entrypoint.name}`
+        },
+        minimize: true,
+        minimizer: [
+          //生产环境的压缩方案：js和css
+          new TerserPlugin({
+            parallel: true,//多线程
+            terserOptions: {
+              compress: {
+                drop_console: false//去除console
+              }
+            }
+          })
+        ],
+    },
+
+
 ### 未解决的问题 
     
     1.html-loader与HtmlWebpackPlugin的冲突

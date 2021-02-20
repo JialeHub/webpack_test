@@ -4,7 +4,7 @@
 // import 'regenerator-runtime/runtime';
 // webpack入口文件
 import './style/index.css';
-import './style/test1.less';
+import '$css/test1.less';
 // Symbol 引用
 import './font/font_0xas4kzb5juk/iconfont';
 // font-class 引用
@@ -42,8 +42,8 @@ let myMathBtn = document.getElementById('myMath')
 myMathBtn.onclick = function() {
   // 通过js代码，让某个文件被单独打包成一个chunk，import动态导入语法：能将某个文件单独打包
   // webpackPrefetch:是否启用预加载
-  import(/* webpackChunkName: 'myMath', webpackPrefetch: true */'./js/myMath').then(({mul})=>{
-    console.log(mul(3,6))
+  import(/* webpackChunkName: 'myMath', webpackPrefetch: true */'./js/myMath').then((/*将default重命名*/{default : myMul,add2})=>{
+    console.log(myMul(3,6),add2(1,2))
   }).catch(err=>{
     console.log('文件加载失败：',err)
   })
