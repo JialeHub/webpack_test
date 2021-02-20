@@ -1,0 +1,2 @@
+(globalThis.webpackChunktest1=globalThis.webpackChunktest1||[]).push([[141],{6283:(t,n,u)=>{"use strict";function e(t,n){return t*n}function a(t,n){return t+n}function o(t,n){return 2*(t+n)}u.r(n),u.d(n,{default:()=>e,add:()=>a,add2:()=>o}),console.log("加载myMath模块...")}}]);
+//# sourceMappingURL=myMath_chunk_4819657137.bundle.js.map
