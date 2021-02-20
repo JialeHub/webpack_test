@@ -2,6 +2,7 @@
 
 // resolve:用来拼接绝对路径的方法
 const {resolve} = require('path');
+const webpack = require('webpack');
 
 //loader: 1.下载 2.使用(配置loader)
 //plugins: 1.下载 2.引入 3.使用
@@ -11,6 +12,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
+const HtmlWebpackTagsPlugin = require('html-webpack-tags-plugin');
 
 //设置nodejs的环境变量
 const isProd = process.env.NODE_ENV === 'production'
@@ -64,21 +68,21 @@ module.exports = {
   // entry:'./src/index.js',
   // entry: ['./src/index.js',//'./src/index.html'],
   // 多页面应用
-  entry:{
-    index:'./src/index.js',
-    test:'./src/test.js',
+  entry: {
+    index: './src/index.js',
+    test: './src/test.js',
   },
   output: {
     publicPath: isProd ? './' : '/',
     filename: 'static/js/[name]_[contenthash:10].bundle.js',
     path: resolve(__dirname, 'dist'),
-    assetModuleFilename: 'assets/[name]_[contenthash:10][ext][query]'//非编译文件自定义输出文件名
+    assetModuleFilename: 'assets/[name]_[contenthash:10][ext][query]',//非编译文件自定义输出文件名
   },
   //优化
   optimization: {
     //可以将node_modules中代码单独打包一个chunk最终输出,自动分析多入口Chunk中有无公共文件，如果有将单独打包成一个Chunk
-    splitChunks:{
-      chunks:'all'
+    splitChunks: {
+      chunks: 'all'
     },
     minimize: true,
     minimizer: [new TerserPlugin({
@@ -90,6 +94,11 @@ module.exports = {
       }
     })],
   },
+  //外部扩展，从CDN获取，拒绝|忽略包
+  /*externals: {
+    //包名:变量名
+    jquery: 'jQuery',
+  },*/
   //loader的配置
   module: {
     rules: [
@@ -97,38 +106,28 @@ module.exports = {
         test: /\.m?js$/,
         exclude: /node_modules/,
         // enforce: 'pre',//优先执行
-        use: {
-          loader: "babel-loader",
-          options: {
-            // 缓存
-            cacheDirectory: true,
-            // 使用配置文件babel.config.json
-            rootMode: "upward",
-            // 使用此处配置
-            /*presets: [
-              [
-                '@babel/preset-env',
-                {
-                  useBuiltIns: 'usage',//按需加载
-                  corejs:{
-                    version: 3
-                  },
-                  targets: {
-                    chrome: '60',
-                    firefox:'60',
-                    ie: '9',
-                    safari: '11',
-                    edge:'17'
-                  }
-                }
-              ]
-            ],*/
+        use: [
+          // 'thread-loader',//开启多进程打包
+          /*{
+            loader: "thread-loader",
+            options: {
+              worker: 2//进程数
+            }
+          },*/
+          {
+            loader: "babel-loader",
+            options: {
+              cacheDirectory: true,// 缓存
+              rootMode: "upward",// 使用配置文件babel.config.json
+              // 使用此处配置
+              /*presets: [],*/
+            }
           }
-        }
+        ]
       },
       {
         //oneOf下的loader只会匹配一个，提高性能，注意:不能有两个配置处理同一种类型文件
-        oneOf:[
+        oneOf: [
           {
             test: /\.css$/i, //正则匹配文件
             // exclude: /iconfont\.css$/i,
@@ -208,12 +207,35 @@ module.exports = {
       filename: 'static/css/[name]_[contenthash:10].css',
     }),
     new HtmlWebpackPlugin({
-      title: isProd?'Webpack-生产模式':'Webpack-开发模式',
+      title: isProd ? 'Webpack-生产模式' : 'Webpack-开发模式',
       template: './src/index.html', //模板
       minify: {
         collapseWhitespace: true,//移除空格,默认true
         removeComments: true,//移除注释,默认true
       }
+    }),
+    new WorkboxPlugin.GenerateSW({
+      // 这些选项帮助快速启用 ServiceWorkers
+      // 删除“旧的” ServiceWorkers
+      clientsClaim: true,
+      skipWaiting: true,
+    }),
+    //告诉webpack哪些库不参与打包，同时使用时的名称也得变~
+    new webpack.DllReferencePlugin({
+      manifest: resolve(__dirname, 'dll/manifest.json'),
+    }),
+    new CopyPlugin({
+      patterns: [
+        {from:"dll/jquery.js",to:'assets/jquery'}
+      ]
+    }),
+    new HtmlWebpackTagsPlugin({
+      scripts: [
+        {
+          path: 'assets/jquery/jquery.js',
+          append:false //head前面插入
+        },
+      ]
     }),
     new ESLintPlugin({
       fix: true

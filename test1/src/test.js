@@ -1,5 +1,5 @@
 /* eslint-disable */
-import $ from 'jQuery'
+import $ from 'jquery'
 console.log($)
 
 function sum(...args) {
