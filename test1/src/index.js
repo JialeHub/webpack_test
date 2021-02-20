@@ -1,3 +1,4 @@
+/* eslint-disable */
 // 全部js兼容 (按需js兼容:配置babel-loader即可)
 // import 'core-js/stable';
 // import 'regenerator-runtime/runtime';
@@ -15,21 +16,32 @@ import './style/iconfont.css';
 
 import data from './json/data.json';
 
-// eslint-disable-next-line
+import {print} from './js/print';
+import $ from 'jQuery'
+console.log($)
+console.log(process.env.NODE_ENV)
+
 console.log(data);
 
 const add = (x, y) => x + y;
 
-// eslint-disable-next-line
 console.log(add(1, 2));
 
 const PromiseTest = new Promise((resolve) => {
   setTimeout(() => {
-    // eslint-disable-next-line
     console.log('定时器1秒');
     resolve();
   }, 1000);
 });
 
-// eslint-disable-next-line
+print();
 console.log(PromiseTest);
+
+if (module.hot) {
+  // 一旦 module.hot为true，说明开启了HMR功能。-->让HMR功能代码生效
+  module.hot.accept('./js/print', () => {
+    // 方法会监听print.js 文件的变化，一旦发生变化，其他模块不会重新打包构建。
+    // 会执行后面的回调函数
+    print();
+  });
+}

@@ -1,0 +1,11 @@
+# 生产模式
+[production staging]
+last 1 chrome version
+last 1 firefox version
+last 1 safari version
+
+# 开发模式
+[development]
+> 1%
+not dead
+not op_mini all

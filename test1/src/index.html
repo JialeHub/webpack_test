@@ -2,14 +2,15 @@
 <html lang="zh-cn">
 <head>
   <meta charset="UTF-8">
-  <title>Hello</title>
+  <title><%= htmlWebpackPlugin.options.title %></title>
 </head>
 <body>
 <div id="title">Title</div>
 <div id="b1"></div>
 <div id="b2"></div>
 <div id="b3"></div>
-<img src="./img/b.jpg" alt="b.jpg">
+<!--<img src="./img/b.jpg" alt="b.jpg">-->
+<img src="<%= require( './img/b.jpg') %>" alt="b.jpg" width="400">
 
 <div class="myPostcssTest"></div>
 

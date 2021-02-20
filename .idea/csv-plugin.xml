@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\test1\src\index.html">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\test1\webpack.config.js">
           <value>
             <Attribute>
